@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+<title>Jstice</title>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="CodeMirror/lib/codemirror.css">
+<link rel="stylesheet" href="CodeMirror/addon/dialog/dialog.css">
+<link rel="stylesheet" href="CodeMirror/addon/search/matchesonscrollbar.css">
+<script src="CodeMirror/lib/codemirror.js"></script>
+<script src="CodeMirror/mode/xml/xml.js"></script>
+<script src="CodeMirror/addon/dialog/dialog.js"></script>
+<script src="CodeMirror/addon/search/searchcursor.js"></script>
+<script src="CodeMirror/addon/search/search.js"></script>
+<script src="CodeMirror/addon/scroll/annotatescrollbar.js"></script>
+<script src="CodeMirror/addon/search/matchesonscrollbar.js"></script>
+<link rel="stylesheet" href="CodeMirror/theme/monokai.css">
+<script src="CodeMirror/addon/edit/closebrackets.js"></script>
+<script src="CodeMirror/addon/mode/loadmode.js"></script>
+<script src="CodeMirror/mode/meta.js"></script>
+<script src="CodeMirror/addon/search/match-highlighter.js"></script>
+<script src="CodeMirror/addon/hint/show-hint.js"></script>
+<script src="CodeMirror/addon/hint/anyword-hint.js"></script>
+<style type="text/css">
+      .CodeMirror {border-top: 0px solid black; border-bottom: 0px solid black; margin:0px;padding:0px;height: auto;position: fixed;
+  top: 30px; left: 0; right: 0; bottom: 0;}
+      dt {font-family: monospace; color: #666;}
+	  .CodeMirror-focused .cm-matchhighlight {
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+        background-position: bottom;
+        background-repeat: repeat-x;
+      }
+    </style>
+</head>
+<body style="padding:0px;overflow:hidden;scroll:no">
+<div id="all">
+<div id="top" style="height:30px">
+menu
+</div>
+<div style="height:700px">
+<form style="height:100%"><textarea id="code" name="code" >
+Drag and drop a file here.
+Press ctrl-space to activate autocompletion.
+Ctl+F to search.
+</textarea></form></div>
+<script>
+ CodeMirror.commands.autocomplete = function(cm) {
+        cm.showHint({hint: CodeMirror.hint.anyword});
+      }
+	  
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+  mode: "text/html",
+  lineNumbers: true,
+   viewportMargin: Infinity,
+   theme:"monokai",
+   dragDrop: false,
+   autoCloseBrackets: true,
+   highlightSelectionMatches: {showToken: /\w/},
+   extraKeys: {"Ctrl-Space": "autocomplete"}
+});
+
+CodeMirror.modeURL = "CodeMirror/mode/%N/%N.js";
+
+// prevent default behavior from changing page on dropped file
+window.ondragover = function(e) { e.preventDefault(); return false };
+window.ondrop = function(e) { e.preventDefault(); return false };
+
+var all = document.getElementById('all'); //window.ondrop
+
+all.ondrop = function (e) {
+  e.preventDefault();
+
+  for (var i = 0; i < e.dataTransfer.files.length; ++i) {
+    console.log("loading : "+e.dataTransfer.files[i].path);
+	loadfile(e.dataTransfer.files[i]);
+  }
+  return false;
+};
+
+function loadfile(input) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    editor.setValue(e.target.result);
+                }
+                reader.readAsText(input);
+				
+				var val = input.path;
+				var m, mode, spec;
+  if (m = /.+\.([^.]+)$/.exec(val)) {
+  
+    var info = CodeMirror.findModeByExtension(m[1]);
+    if (info) {
+      mode = info.mode;
+      spec = info.mime;
+    }
+  } else if (/\//.test(val)) {
+  
+    var info = CodeMirror.findModeByMIME(val);
+    if (info) {
+      mode = info.mode;
+      spec = val;
+    }
+  } else {
+    mode = spec = val;
+  }
+  if (mode) {
+    editor.setOption("mode", spec);
+    CodeMirror.autoLoadMode(editor, mode);
+    //document.getElementById("modeinfo").textContent = spec;
+  } else {
+    alert("Could not find a mode corresponding to " + val);
+  }
+            }
+</script>
+</div>
+ </body>
+ </html>
