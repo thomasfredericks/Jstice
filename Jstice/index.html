@@ -32,9 +32,11 @@
     </style>
 </head>
 <body style="padding:0px;overflow:hidden;scroll:no">
+<input style="display:none;" id="fileDialog" type="file" />
+
 <div id="all">
 <div id="top" style="height:30px">
-menu
+menu <a href="javascript:filedialog.click()">open</a> <a href="javascript:run()">run</a>
 </div>
 <div style="height:700px">
 <form style="height:100%"><textarea id="code" name="code" >
@@ -48,7 +50,6 @@ Ctl+F to search.
       }
 	  
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-  mode: "text/html",
   lineNumbers: true,
    viewportMargin: Infinity,
    theme:"monokai",
@@ -60,6 +61,36 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 CodeMirror.modeURL = "CodeMirror/mode/%N/%N.js";
 
+
+// RUN
+// ===
+
+var gui = require('nw.gui');
+function run() {
+// Create a new window and get it
+var new_win = gui.Window.open('https://github.com',{
+  position: 'center',
+  width: 640,
+  height: 480,
+  focus: true,
+  toolbar: false,
+   frame: true
+});
+}
+
+
+// FILE LOADING
+//=============
+
+
+var filedialog = document.querySelector('#fileDialog');
+    filedialog.addEventListener("change", function(evt) {
+      console.log("selected: "+this.value);
+	  console.log("files: "+evt.target.files[0]);
+	  loadfile(evt.target.files[0]);
+    } , false);
+
+    
 // prevent default behavior from changing page on dropped file
 window.ondragover = function(e) { e.preventDefault(); return false };
 window.ondrop = function(e) { e.preventDefault(); return false };
@@ -68,15 +99,19 @@ var all = document.getElementById('all'); //window.ondrop
 
 all.ondrop = function (e) {
   e.preventDefault();
-
+  console.log("loading : "+e.dataTransfer.files[0].path);
+	loadfile(e.dataTransfer.files[0]);
+/*
   for (var i = 0; i < e.dataTransfer.files.length; ++i) {
     console.log("loading : "+e.dataTransfer.files[i].path);
 	loadfile(e.dataTransfer.files[i]);
   }
+  */
   return false;
 };
 
 function loadfile(input) {
+				console.log("reading: "+input);
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     editor.setValue(e.target.result);
