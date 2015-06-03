@@ -12,7 +12,7 @@
     "icon": "link.png",
     "fullscreen": false,
     "toolbar": true,
-    "frame": true,
+    "frame": false,
     "width": 800,
     "height": 500,
     "position": "center",
@@ -29,13 +29,6 @@
     "plugin": true
   },
   "dependencies": {
-    "fs-extra": "^0.18.4",
-    "node-watch": "^0.3.4"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Thomas O Fredericks",
-  "license": "ISC"
+    "fs-extra": "^0.18.4"
+  }
 }
