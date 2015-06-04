@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Convenient Canvas</title>
+    </head>
+    <body style="margin: 0px; overflow: hidden;background-color:rgb(60,60,60);">
+		<script type="text/javascript" src="cthree.js"></script>
+        <script type="text/javascript" src="three.min.js"></script>
+        <script src="Detector.js"></script>
+        <script type="text/javascript">
+
+        if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+
+
+            // C3
+            // =====================
+
+            // Créer une instance de cthree
+            var c3 = new cthree();
+
+            var plane;
+
+            // Initialiser les variables
+
+            var image = c3.preloadImage("http://adamablue.com/wp-content/uploads/2014/10/big-bird-for-photoshop-class.jpg");
+
+
+            // CC ONDRAW
+            // =====================
+            c3.onLoaded = function() { // fonction execute lorsque tout est pret ...
+
+
+
+              // CREATE AND CONFIGURE TEXTURE
+              var texture = new THREE.Texture( image );
+              
+
+              // CREATE AND CONFIGURE MATERIAL
+              var material = new THREE.MeshBasicMaterial(  {
+                  map: texture,
+                  side: THREE.DoubleSide,
+                  transparent: false
+              } );
+
+              texture.needsUpdate = true;
+
+              // CREATE GEOMETRY
+              var planeGeometry = new THREE.PlaneGeometry( 4, 4, 1, 1 );
+
+              // CREATE MESH AND ADD IT TO THE SCENE
+              plane = new THREE.Mesh( planeGeometry, material );
+
+              c3.add(plane);
+
+
+
+
+            }
+
+            c3.onUpdate =  function( ) { // fonction execute a chaque image. ...
+
+
+
+              plane.position = c3.screenCoordinatesToWorld(c3.mouseX,c3.mouseY,10);
+              plane.rotation.y = c3.timestamp * 0.01;
+
+              if (c3.mouseDown) {
+
+              //  console.log(c3.mouseX+" "+c3.mouseY);
+                //console.log(c3.mouse3D.position);
+              }
+            };
+
+            c3.start();
+
+
+        </script>
+    </body>
+</html>

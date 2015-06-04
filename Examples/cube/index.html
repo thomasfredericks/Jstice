@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Convenient Canvas</title>
+    </head>
+    <body style="margin: 0px; overflow: hidden;background-color:rgb(60,60,60);">
+		<script type="text/javascript" src="cthree.js"></script>
+        <script type="text/javascript" src="three.min.js"></script>
+        <script src="Detector.js"></script>
+        <script type="text/javascript">
+
+        if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+
+
+            // C3
+            // =====================
+
+            // Créer une instance de cthree
+            var c3 = new cthree();
+
+            var cube;
+
+            // Initialiser les variables
+
+            //var image = c3.preloadImage("http://adamablue.com/wp-content/uploads/2014/10/big-bird-for-photoshop-class.jpg");
+
+
+            // CC ONDRAW
+            // =====================
+            c3.onLoaded = function() { // fonction execute lorsque tout est pret ...
+
+              var geometry = new THREE.BoxGeometry(1,1,1);
+              var material = new THREE.MeshLambertMaterial ( { color: 0x00ff00 } );  //THREE.MeshLambertMaterial for lighting
+              cube =  new THREE.Mesh( geometry, material );
+              cube.scale.set(2,2,2);
+              //c3.scene.add(cube);
+              c3.add( cube );
+
+              // La lumiere du soleil
+              var lumiereDuSoleil = new THREE.DirectionalLight( 0xffffff, 0.5 );
+              lumiereDuSoleil.position.x = 1;
+              lumiereDuSoleil.position.z = 1;
+              c3.add( lumiereDuSoleil );
+            }
+
+            c3.onUpdate =  function( ) { // fonction execute a chaque image. ...
+
+              cube.rotation.y = cube.rotation.y + 0.1;
+  
+
+            
+              if (c3.mouseDown) {
+					  cube.position = c3.normalizedCoordinatesToWorld(Math.sin(c3.timestamp*0.005),0,10)
+              }
+            };
+
+            c3.start();
+
+
+        </script>
+    </body>
+</html>

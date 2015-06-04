@@ -37,16 +37,21 @@
 <input style="display:none;" id="newdialog" type="file" nwsaveas />
 <div id="all">
 <div id="top" style="height:30px">
-  <a href="javascript:newdialog.click()">new</a> <a href="javascript:opendialog.click()">open</a> <a href="javascript:run()">run</a>
+  <a href="javascript:newdialog.click()">new</a>
+  <a href="javascript:opendialog.click()">open</a>
+  <a href="javascript:run()">run</a>
+  <a href="javascript:save()">save</a>
+  <a href="javascript:devTools()">console</a>
+  <a href="javascript:reload()">reload</a>
 </div>
-<div style="height:700px">
+<div >
 <form style="height:100%"><textarea id="code" name="code" >
-Drag and drop a file here.
+Create a new project or open a previous one.
 Press ctrl-space to activate autocompletion.
 Ctl+F to search.
 </textarea></form></div>
 <script>
-
+var gui = require('nw.gui');
 
 // EDITOR
 // =========
@@ -67,7 +72,16 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 
 CodeMirror.modeURL = "CodeMirror/mode/%N/%N.js";
 
+// DEV TOOLS
+// =========
+function devTools() {
+  gui.Window.get().showDevTools();
+}
 
+function reload() {
+
+  gui.Window.get().reloadDev();
+}
 
 
 
@@ -88,7 +102,7 @@ function isNotWorking() {
 // RUN
 // ===
 
-var gui = require('nw.gui');
+
 function run() {
   if ( isNotWorking() && currentFilePath ) {
     // Create a new window and get it
