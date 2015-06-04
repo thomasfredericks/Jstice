@@ -20,6 +20,7 @@
 <script src="CodeMirror/addon/search/match-highlighter.js"></script>
 <script src="CodeMirror/addon/hint/show-hint.js"></script>
 <script src="CodeMirror/addon/hint/anyword-hint.js"></script>
+<script> var fse = require('fs-extra'); </script>
 <style type="text/css">
       .CodeMirror {border-top: 0px solid black; border-bottom: 0px solid black; margin:0px;padding:0px;height: auto;position: fixed;
   top: 30px; left: 0; right: 0; bottom: 0;}
@@ -32,11 +33,11 @@
     </style>
 </head>
 <body style="padding:0px;overflow:hidden;scroll:no">
-<input style="display:none;" id="fileDialog" type="file" />
-
+<input style="display:none;" id="opendialog" type="file" nwdirectory  />
+<input style="display:none;" id="newdialog" type="file" nwsaveas />
 <div id="all">
 <div id="top" style="height:30px">
-menu <a href="javascript:filedialog.click()">open</a> <a href="javascript:run()">run</a>
+  <a href="javascript:newdialog.click()">new</a> <a href="javascript:opendialog.click()">open</a> <a href="javascript:run()">run</a>
 </div>
 <div style="height:700px">
 <form style="height:100%"><textarea id="code" name="code" >
@@ -45,10 +46,15 @@ Press ctrl-space to activate autocompletion.
 Ctl+F to search.
 </textarea></form></div>
 <script>
+
+
+// EDITOR
+// =========
+
  CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.anyword});
       }
-	  
+
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
   lineNumbers: true,
    viewportMargin: Infinity,
@@ -62,35 +68,134 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 CodeMirror.modeURL = "CodeMirror/mode/%N/%N.js";
 
 
+
+
+
+// CURRENT FILE
+// =========
+var directory;
+var currentFilePath;
+var working = false;
+
+function isNotWorking() {
+  if ( working ) console.log("already working");
+  return !working;
+}
+
+
+
+
 // RUN
 // ===
 
 var gui = require('nw.gui');
 function run() {
-// Create a new window and get it
-var new_win = gui.Window.open('https://github.com',{
-  position: 'center',
-  width: 640,
-  height: 480,
-  focus: true,
-  toolbar: false,
-   frame: true
-});
+  if ( isNotWorking() && currentFilePath ) {
+    // Create a new window and get it
+    var openWindow = function() {
+
+      var new_win = gui.Window.open('file:///'+currentFilePath,{
+        position: 'center',
+        width: 640,
+        height: 480,
+        focus: true,
+        toolbar: false,
+         frame: true
+      });
+
+    }
+    save( openWindow );
+
+  }
+}
+
+// SAVE
+// ====
+
+function save(onSaved) {
+  if ( isNotWorking() && currentFilePath ) {
+    working = true;
+    fse.writeFile(currentFilePath, editor.getValue(), function(err) {
+        if(err) console.log(err);
+        else console.log("The file was saved!");
+        if ( onSaved) onSaved();
+        working = false;
+    });
+  }
 }
 
 
-// FILE LOADING
-//=============
+// NEW
+// ===
 
+var newdialog = document.querySelector('#newdialog');
+newdialog.addEventListener("change", function(evt) {
 
-var filedialog = document.querySelector('#fileDialog');
-    filedialog.addEventListener("change", function(evt) {
+  if ( this.value.length > 0 ) {
+    if (  isNotWorking()  ) {
       console.log("selected: "+this.value);
-	  console.log("files: "+evt.target.files[0]);
-	  loadfile(evt.target.files[0]);
+      //console.log("files: "+evt.target.files[0]);
+      directory = this.value;
+
+      working = true;
+
+      fse.copy('new', directory , function (err) {
+          working = false;
+          if (err)  console.error(err)
+          console.log('success!')
+          currentFilePath = directory+"/index.html";
+          console.log(currentFilePath);
+          loadfile( new File(currentFilePath,"/index.html") );
+        //loadfile());
+        }) // copies directory, even if it has subdirectories or files
+      //loadfile(evt.target.files[0]);
+      }
+    } else {
+      console.log("user cancelled");
+    }
+
+
+
+} , false);
+
+
+// OPEN
+// ====
+
+var opendialog = document.querySelector('#opendialog');
+opendialog.addEventListener("change", function(evt) {
+      if ( this.value.length > 0 ) {
+        if ( isNotWorking) {
+          working = true;
+          console.log("selected: "+this.value);
+          directory = this.value;
+          fse.exists(directory+"/index.html", function (exists) {
+            working = false;
+            if ( exists ) {
+
+              currentFilePath = directory+"/index.html";
+              loadfile( new File(currentFilePath,"/index.html") );
+            } else {
+              console.log("Did not find index.html!");
+            }
+
+          });
+      	//  loadfile(evt.target.files[0]);
+
+        }
+
+      } else {
+        console.log("user cancelled");
+      }
+
     } , false);
 
-    
+
+/*
+
+// DRAG & DROP
+// ===========
+
 // prevent default behavior from changing page on dropped file
 window.ondragover = function(e) { e.preventDefault(); return false };
 window.ondrop = function(e) { e.preventDefault(); return false };
@@ -101,34 +206,33 @@ all.ondrop = function (e) {
   e.preventDefault();
   console.log("loading : "+e.dataTransfer.files[0].path);
 	loadfile(e.dataTransfer.files[0]);
-/*
-  for (var i = 0; i < e.dataTransfer.files.length; ++i) {
-    console.log("loading : "+e.dataTransfer.files[i].path);
-	loadfile(e.dataTransfer.files[i]);
-  }
-  */
+
   return false;
 };
+*/
 
-function loadfile(input) {
-				console.log("reading: "+input);
+// FILE LOADING
+//=============
+
+function loadfile(file) {
+				console.log("reading: "+file.path);
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     editor.setValue(e.target.result);
                 }
-                reader.readAsText(input);
-				
-				var val = input.path;
+                reader.readAsText(file);
+
+				var val = file.path;
 				var m, mode, spec;
   if (m = /.+\.([^.]+)$/.exec(val)) {
-  
+
     var info = CodeMirror.findModeByExtension(m[1]);
     if (info) {
       mode = info.mode;
       spec = info.mime;
     }
   } else if (/\//.test(val)) {
-  
+
     var info = CodeMirror.findModeByMIME(val);
     if (info) {
       mode = info.mode;
