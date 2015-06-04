@@ -1,18 +1,15 @@
 {
   "main": "index.html",
-  "name": "Jstice",
+  "name": "nw-demo",
   "description": "demo app of node-webkit",
   "version": "0.1.0",
-  "keywords": [
-    "demo",
-    "node-webkit"
-  ],
+  "keywords": [ "demo", "node-webkit" ],
   "window": {
     "title": "node-webkit demo",
     "icon": "link.png",
-    "fullscreen": false,
+    "fullscreen" : false,
     "toolbar": true,
-    "frame": true,
+    "frame": false,
     "width": 800,
     "height": 500,
     "position": "center",
@@ -21,21 +18,11 @@
     "max_width": 800,
     "max_height": 600,
     "resizable": true,
-    "always-on-top": false,
-    "kiosk": false,
-    "transparent": false
+    "always-on-top" : false,
+    "kiosk" : false,
+    "transparent" : false
   },
   "webkit": {
     "plugin": true
-  },
-  "dependencies": {
-    "fs-extra": "^0.18.4",
-    "node-watch": "^0.3.4"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Thomas O Fredericks",
-  "license": "ISC"
+  }
 }
